@@ -40,10 +40,32 @@ def create_directory_structures(labels):
             pass
 
 
+def create_validation_set():
+    directory_data = {}
+
+    for i in range(0, 10):
+        for info in os.walk('data/train/%s' % str(i)):
+            directory_data[str(i)] = info[2]
+
+    for label, file in directory_data.items():
+        directory_data[label] = directory_data[label][0:20]
+
+    return directory_data
+
+
+def move_files_to_validation_set(data):
+    for label, files in data.items():
+        for file in files:
+            shutil.move('data/train/%s/%s' % (str(label), file), 'data/test/%s' % str(label))
+
+
 def organize_data(data, mode='train'):
-    for label, names in data.items():
-        for name in names:
-            shutil.move('Train_Data/Images/%s/%s' % (mode, name), 'data/%s/%s' % (mode, str(label)))
+    try:
+        for label, names in data.items():
+            for name in names:
+                shutil.move('Train_Data/Images/%s/%s' % (mode, name), 'data/%s/%s' % (mode, str(label)))
+    except OSError as _:
+        pass
 
 
 if __name__ == "__main__":
@@ -51,3 +73,4 @@ if __name__ == "__main__":
     filtered_data = get_labels_and_names(raw_data)
     create_directory_structures(filtered_data.keys())
     organize_data(filtered_data, mode='train')
+    move_files_to_validation_set(create_validation_set())
